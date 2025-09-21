@@ -22,7 +22,6 @@ export class AuthController {
     this.loginUseCase = container.get("loginUseCase");
     this.getUserByIdUseCase = container.get("getUserByIdUseCase");
 
-    // Bind methods to ensure 'this' context is correct
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
     this.getProfile = this.getProfile.bind(this);
@@ -32,19 +31,16 @@ export class AuthController {
     const dto: RegisterUserDTO = req.body;
     const user = await this.registerUserUseCase.execute(dto);
 
-    // DTO for the response to avoid leaking sensitive data like passwordHash
-    const responseDto = { id: user.id, name: user.name, email: user.email };
-
-    res.status(StatusCodes.CREATED).json(responseDto);
+    res.status(StatusCodes.CREATED).json(this.formatUserResponse(user));
   }
 
   public async login(req: Request, res: Response): Promise<void> {
     const dto: LoginDTO = req.body;
     const { user, token }: LoginResult = await this.loginUseCase.execute(dto);
 
-    const userResponse = { id: user.id, name: user.name, email: user.email };
-
-    res.status(StatusCodes.OK).json({ user: userResponse, token });
+    res
+      .status(StatusCodes.OK)
+      .json({ user: this.formatUserResponse(user), token });
   }
 
   public async getProfile(req: Request, res: Response): Promise<void> {
@@ -54,5 +50,13 @@ export class AuthController {
 
     const user = await this.getUserByIdUseCase.execute(req.user.id);
     res.status(StatusCodes.OK).json({ user });
+  }
+
+  private formatUserResponse(user: any) {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    };
   }
 }

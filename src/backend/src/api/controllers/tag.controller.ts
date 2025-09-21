@@ -28,11 +28,7 @@ export class TagController {
     const dto: CreateTagDTO = req.body;
     const tag = await this.createTagUseCase.execute(dto, req.user.id);
 
-    res.status(StatusCodes.CREATED).json({
-      id: tag.id,
-      name: tag.name,
-      userId: tag.userId,
-    });
+    res.status(StatusCodes.CREATED).json(this.formatTagResponse(tag));
   }
 
   public async getByUser(req: Request, res: Response): Promise<void> {
@@ -42,12 +38,14 @@ export class TagController {
 
     const tags = await this.getTagsByUserUseCase.execute(req.user.id);
 
-    res.status(StatusCodes.OK).json(
-      tags.map((tag) => ({
-        id: tag.id,
-        name: tag.name,
-        userId: tag.userId,
-      }))
-    );
+    res.status(StatusCodes.OK).json(tags.map(this.formatTagResponse));
+  }
+
+  private formatTagResponse(tag: any) {
+    return {
+      id: tag.id,
+      name: tag.name,
+      userId: tag.userId,
+    };
   }
 }

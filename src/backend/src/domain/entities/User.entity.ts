@@ -1,16 +1,11 @@
-// Note: We are not extending the base Entity here because the ID management is slightly different.
-// A new user doesn't have an ID until it's persisted.
+import { BadRequestError } from "../../utils/AppError";
+
 export class User {
-  // Properties
   public readonly id: number | null;
   public email: string;
   public name: string;
-  public passwordHash: string; // The domain only cares about the hash, not the plaintext password.
+  public passwordHash: string;
 
-  /**
-   * The constructor is the gatekeeper for creating a valid User.
-   * It enforces the entity's invariants (rules that must always be true).
-   */
   constructor(
     id: number | null,
     email: string,
@@ -18,13 +13,13 @@ export class User {
     passwordHash: string
   ) {
     if (!email || !email.includes("@")) {
-      throw new Error("A valid email is required for a User.");
+      throw new BadRequestError("A valid email is required for a User.");
     }
     if (!name || name.trim().length === 0) {
-      throw new Error("User name cannot be empty.");
+      throw new BadRequestError("User name cannot be empty.");
     }
     if (!passwordHash) {
-      throw new Error("A password hash is required for a User.");
+      throw new BadRequestError("A password hash is required for a User.");
     }
 
     this.id = id;
@@ -39,7 +34,7 @@ export class User {
    */
   public updateProfile(name: string): void {
     if (!name || name.trim().length === 0) {
-      throw new Error("User name cannot be empty.");
+      throw new BadRequestError("User name cannot be empty.");
     }
     this.name = name;
   }

@@ -1,5 +1,6 @@
 import { Priority } from "domain/enums/Task.types";
 import { Tag } from "./Tag.entity";
+import { BadRequestError } from "../../utils/AppError";
 
 export interface TaskProps {
   id: number | null;
@@ -26,10 +27,10 @@ export class Task {
 
   constructor(props: TaskProps) {
     if (!props.title || props.title.trim().length === 0) {
-      throw new Error("Task title cannot be empty.");
+      throw new BadRequestError("Task title cannot be empty.");
     }
     if (!props.userId) {
-      throw new Error("Task must be associated with a user.");
+      throw new BadRequestError("Task must be associated with a user.");
     }
 
     this.id = props.id;
@@ -70,7 +71,7 @@ export class Task {
     description?: string;
   }): void {
     if (details.title && details.title.trim().length === 0) {
-      throw new Error("Task title cannot be empty.");
+      throw new BadRequestError("Task title cannot be empty.");
     }
     if (details.title) {
       this.title = details.title;

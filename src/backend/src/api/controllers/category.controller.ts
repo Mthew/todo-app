@@ -27,7 +27,6 @@ export class CategoryController {
     this.updateCategoryUseCase = container.get("updateCategoryUseCase");
     this.deleteCategoryUseCase = container.get("deleteCategoryUseCase");
 
-    // Bind methods to ensure 'this' context is correct
     this.create = this.create.bind(this);
     this.getByUser = this.getByUser.bind(this);
     this.update = this.update.bind(this);
@@ -42,12 +41,7 @@ export class CategoryController {
     const dto: CreateCategoryDTO = req.body;
     const category = await this.createCategoryUseCase.execute(dto, req.user.id);
 
-    // Return data directly as requested
-    res.status(StatusCodes.CREATED).json({
-      id: category.id,
-      name: category.name,
-      userId: category.userId,
-    });
+    res.status(StatusCodes.CREATED).json(this.formatCategoryResponse(category));
   }
 
   public async getByUser(req: Request, res: Response): Promise<void> {
@@ -59,14 +53,9 @@ export class CategoryController {
       req.user.id
     );
 
-    // Return data directly as requested
-    res.status(StatusCodes.OK).json(
-      categories.map((category) => ({
-        id: category.id,
-        name: category.name,
-        userId: category.userId,
-      }))
-    );
+    res
+      .status(StatusCodes.OK)
+      .json(categories.map(this.formatCategoryResponse));
   }
 
   public async update(req: Request, res: Response): Promise<void> {
@@ -83,12 +72,7 @@ export class CategoryController {
       dto
     );
 
-    // Return data directly as requested
-    res.status(StatusCodes.OK).json({
-      id: category.id,
-      name: category.name,
-      userId: category.userId,
-    });
+    res.status(StatusCodes.OK).json(this.formatCategoryResponse(category));
   }
 
   public async delete(req: Request, res: Response): Promise<void> {
@@ -100,7 +84,14 @@ export class CategoryController {
 
     await this.deleteCategoryUseCase.execute(categoryId, req.user.id);
 
-    // Return data directly as requested (empty response for delete)
     res.status(StatusCodes.NO_CONTENT).send();
+  }
+
+  private formatCategoryResponse(category: any) {
+    return {
+      id: category.id,
+      name: category.name,
+      userId: category.userId,
+    };
   }
 }

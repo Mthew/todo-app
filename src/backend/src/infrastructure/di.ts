@@ -16,8 +16,14 @@ import {
   RegisterUserUseCase,
   GetUserByIdUseCase,
 } from "../application/use-cases/auth";
-import { CreateTaskUseCase } from "../application/use-cases/task";
-import { GetTasksByUserUseCase } from "../application/use-cases/task/GetTasksByUser.usecase";
+
+import {
+  CompleteTaskUseCase,
+  CreateTaskUseCase,
+  GetTasksByUserUseCase,
+  UpdateTaskUseCase,
+  DeleteTaskUseCase,
+} from "../application/use-cases/task";
 import {
   CreateTagUseCase,
   GetTagsByUserUseCase,
@@ -74,6 +80,18 @@ container.set(
 container.set(
   "getTasksByUserUseCase",
   new GetTasksByUserUseCase(container.get("taskRepository"))
+);
+container.set(
+  "updateTaskUseCase",
+  new UpdateTaskUseCase(container.get("taskRepository"))
+);
+container.set(
+  "deleteTaskUseCase",
+  new DeleteTaskUseCase(container.get("taskRepository"))
+);
+container.set(
+  "completeTaskUseCase",
+  new CompleteTaskUseCase(container.get("taskRepository"))
 );
 //#endregion
 

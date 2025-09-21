@@ -188,11 +188,6 @@ const options: Options = {
           type: "object",
           required: ["title"],
           properties: {
-            userId: {
-              type: "integer",
-              example: 1,
-              description: "User ID who owns the task",
-            },
             title: {
               type: "string",
               minLength: 1,
@@ -208,6 +203,52 @@ const options: Options = {
               type: "string",
               enum: ["baja", "media", "alta"],
               default: "media",
+              example: "alta",
+              description: "Task priority level",
+            },
+            dueDate: {
+              type: "string",
+              format: "date-time",
+              example: "2023-12-31T23:59:59.000Z",
+              description: "Task due date",
+            },
+            categoryId: {
+              type: "integer",
+              example: 1,
+              description: "Category ID for the task",
+            },
+            tagIds: {
+              type: "array",
+              items: {
+                type: "integer",
+              },
+              example: [1, 2, 3],
+              description: "Array of tag IDs associated with the task",
+            },
+          },
+        },
+        UpdateTaskRequest: {
+          type: "object",
+          properties: {
+            title: {
+              type: "string",
+              minLength: 1,
+              example: "Updated task title",
+              description: "Task title",
+            },
+            description: {
+              type: "string",
+              example: "Updated task description",
+              description: "Task description",
+            },
+            completed: {
+              type: "boolean",
+              example: true,
+              description: "Task completion status",
+            },
+            priority: {
+              type: "string",
+              enum: ["baja", "media", "alta"],
               example: "alta",
               description: "Task priority level",
             },

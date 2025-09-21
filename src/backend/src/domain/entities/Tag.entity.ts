@@ -1,4 +1,5 @@
-// The Tag entity is structurally identical to Category for this problem.
+import { BadRequestError } from "../../utils/AppError";
+
 export class Tag {
   public readonly id: number | null;
   public name: string;
@@ -6,10 +7,10 @@ export class Tag {
 
   constructor(id: number | null, name: string, userId: number) {
     if (!name || name.trim().length === 0) {
-      throw new Error("Tag name cannot be empty.");
+      throw new BadRequestError("Tag name cannot be empty.");
     }
     if (!userId) {
-      throw new Error("Tag must be associated with a user.");
+      throw new BadRequestError("Tag must be associated with a user.");
     }
 
     this.id = id;
