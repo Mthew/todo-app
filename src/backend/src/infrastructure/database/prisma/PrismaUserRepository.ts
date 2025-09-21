@@ -3,6 +3,9 @@ import { User } from "../../../domain/entities/User.entity";
 import { prisma } from "./PrismaClient";
 
 export class PrismaUserRepository implements IUserRepository {
+  findById(id: number): Promise<User | null> {
+    throw new Error("Method not implemented.");
+  }
   async findByEmail(email: string): Promise<User | null> {
     const userRow = await prisma.user.findUnique({ where: { email } });
     if (!userRow) return null;
