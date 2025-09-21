@@ -378,22 +378,9 @@ const options: Options = {
           },
         },
         TagsResponse: {
-          type: "object",
-          properties: {
-            success: {
-              type: "boolean",
-              example: true,
-            },
-            message: {
-              type: "string",
-              example: "Tags retrieved successfully",
-            },
-            data: {
-              type: "array",
-              items: {
-                $ref: "#/components/schemas/Tag",
-              },
-            },
+          type: "array",
+          items: {
+            $ref: "#/components/schemas/Tag",
           },
         },
       },

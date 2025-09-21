@@ -31,7 +31,7 @@ tagRouter.use(protect);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/TagResponse'
+ *               $ref: '#/components/schemas/Tag'
  *       400:
  *         description: Validation error or tag already exists
  *         content:

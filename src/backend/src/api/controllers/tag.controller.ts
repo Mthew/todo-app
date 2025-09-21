@@ -16,7 +16,6 @@ export class TagController {
     this.createTagUseCase = container.get("createTagUseCase");
     this.getTagsByUserUseCase = container.get("getTagsByUserUseCase");
 
-    // Bind methods to ensure 'this' context is correct
     this.create = this.create.bind(this);
     this.getByUser = this.getByUser.bind(this);
   }
@@ -30,13 +29,9 @@ export class TagController {
     const tag = await this.createTagUseCase.execute(dto, req.user.id);
 
     res.status(StatusCodes.CREATED).json({
-      success: true,
-      message: "Tag created successfully",
-      data: {
-        id: tag.id,
-        name: tag.name,
-        userId: tag.userId,
-      },
+      id: tag.id,
+      name: tag.name,
+      userId: tag.userId,
     });
   }
 
@@ -47,14 +42,12 @@ export class TagController {
 
     const tags = await this.getTagsByUserUseCase.execute(req.user.id);
 
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Tags retrieved successfully",
-      data: tags.map((tag) => ({
+    res.status(StatusCodes.OK).json(
+      tags.map((tag) => ({
         id: tag.id,
         name: tag.name,
         userId: tag.userId,
-      })),
-    });
+      }))
+    );
   }
 }
