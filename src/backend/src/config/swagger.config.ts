@@ -16,7 +16,7 @@ const options: Options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api",
+        url: "http://localhost:3001/api",
         description: "Development server",
       },
       {
@@ -188,6 +188,11 @@ const options: Options = {
           type: "object",
           required: ["title"],
           properties: {
+            userId: {
+              type: "integer",
+              example: 1,
+              description: "User ID who owns the task",
+            },
             title: {
               type: "string",
               minLength: 1,
@@ -318,6 +323,75 @@ const options: Options = {
               type: "array",
               items: {
                 $ref: "#/components/schemas/Task",
+              },
+            },
+          },
+        },
+        // Tag schemas
+        CreateTagRequest: {
+          type: "object",
+          required: ["name"],
+          properties: {
+            name: {
+              type: "string",
+              minLength: 1,
+              maxLength: 50,
+              example: "Work",
+              description: "Tag name",
+            },
+          },
+        },
+        Tag: {
+          type: "object",
+          properties: {
+            id: {
+              type: "integer",
+              example: 1,
+              description: "Tag unique identifier",
+            },
+            name: {
+              type: "string",
+              example: "Work",
+              description: "Tag name",
+            },
+            userId: {
+              type: "integer",
+              example: 1,
+              description: "User ID who owns the tag",
+            },
+          },
+        },
+        TagResponse: {
+          type: "object",
+          properties: {
+            success: {
+              type: "boolean",
+              example: true,
+            },
+            message: {
+              type: "string",
+              example: "Tag created successfully",
+            },
+            data: {
+              $ref: "#/components/schemas/Tag",
+            },
+          },
+        },
+        TagsResponse: {
+          type: "object",
+          properties: {
+            success: {
+              type: "boolean",
+              example: true,
+            },
+            message: {
+              type: "string",
+              example: "Tags retrieved successfully",
+            },
+            data: {
+              type: "array",
+              items: {
+                $ref: "#/components/schemas/Tag",
               },
             },
           },

@@ -1,2 +1,3 @@
-export * from './PrismaTaskRepository';
-export * from './PrismaUserRepository';
+export * from "./PrismaTagRepository";
+export * from "./PrismaTaskRepository";
+export * from "./PrismaUserRepository";

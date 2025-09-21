@@ -10,7 +10,7 @@ const app = express();
 
 // Core Middlewares
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(helmet());
 
 // Swagger Documentation
@@ -43,6 +43,7 @@ app.get("/", (req, res) => {
     endpoints: {
       auth: "/api/auth",
       tasks: "/api/tasks",
+      tags: "/api/tags",
     },
   });
 });
