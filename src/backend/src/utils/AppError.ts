@@ -39,3 +39,9 @@ export class ConflictError extends AppError {
     super(message, StatusCodes.CONFLICT, errors);
   }
 }
+
+export class TooManyRequestsError extends AppError {
+  constructor(message: string = "Too many requests") {
+    super(message, StatusCodes.TOO_MANY_REQUESTS);
+  }
+}

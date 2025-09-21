@@ -1,13 +1,33 @@
 import { Task } from "../../../domain/entities";
 import { ITaskRepository } from "../../ports";
+import { TaskFilterDTO } from "../../dtos/task.dto";
 
 export class GetTasksByUserUseCase {
   constructor(private readonly taskRepository: ITaskRepository) {}
 
-  async execute(userId: number): Promise<Task[]> {
-    // The use case is simple: just delegate the call to the repository.
-    // Its value is in creating a clear, explicit API for this application action.
-    const tasks = await this.taskRepository.findByUserId(userId);
-    return tasks;
+  async execute(
+    userId: number,
+    filters: TaskFilterDTO
+  ): Promise<{
+    tasks: Task[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const result = await this.taskRepository.findByUserIdWithFilters(
+      userId,
+      filters
+    );
+
+    const totalPages = Math.ceil(result.total / filters.limit);
+
+    return {
+      tasks: result.tasks,
+      total: result.total,
+      page: filters.page,
+      limit: filters.limit,
+      totalPages,
+    };
   }
 }

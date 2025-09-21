@@ -24,3 +24,34 @@ export const UpdateTaskSchema = z.object({
 });
 
 export type UpdateTaskDTO = z.infer<typeof UpdateTaskSchema>;
+
+// Schema for task filtering and ordering
+export const TaskFilterSchema = z.object({
+  // Status filter (completed or not)
+  completed: z.boolean().optional(),
+
+  // Priority filter
+  priority: z.enum(["baja", "media", "alta"]).optional(),
+
+  // Category filter
+  categoryId: z.number().int().optional(),
+
+  // Due date filtering
+  dueDateFrom: z.coerce.date().optional(),
+  dueDateTo: z.coerce.date().optional(),
+
+  // Text search in title and description
+  search: z.string().optional(),
+
+  // Ordering
+  orderBy: z
+    .enum(["title", "priority", "dueDate", "createdAt"])
+    .default("createdAt"),
+  orderDirection: z.enum(["asc", "desc"]).default("desc"),
+
+  // Pagination
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(100).default(10),
+});
+
+export type TaskFilterDTO = z.infer<typeof TaskFilterSchema>;

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { TaskController } from "../controllers/task.controller";
 import { protect } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validator.middleware";
+import { rateLimitMiddleware } from "../middlewares/rate-limit.middleware";
 import {
   CreateTaskSchema,
   UpdateTaskSchema,
@@ -10,7 +11,8 @@ import {
 const taskRouter = Router();
 const taskController = new TaskController();
 
-// All task routes are protected
+// All task routes are protected and rate limited
+taskRouter.use(rateLimitMiddleware.crud);
 taskRouter.use(protect);
 
 /**
@@ -61,11 +63,10 @@ taskRouter.use(protect);
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: status
+ *         name: completed
  *         schema:
- *           type: string
- *           enum: [pendiente, en_progreso, completada, cancelada]
- *         description: Filter tasks by status
+ *           type: boolean
+ *         description: Filter tasks by completion status
  *       - in: query
  *         name: priority
  *         schema:
@@ -77,6 +78,37 @@ taskRouter.use(protect);
  *         schema:
  *           type: integer
  *         description: Filter tasks by category ID
+ *       - in: query
+ *         name: dueDateFrom
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter tasks with due date from this date
+ *       - in: query
+ *         name: dueDateTo
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter tasks with due date until this date
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search in task title and description
+ *       - in: query
+ *         name: orderBy
+ *         schema:
+ *           type: string
+ *           enum: [title, priority, dueDate, createdAt]
+ *           default: createdAt
+ *         description: Field to order by
+ *       - in: query
+ *         name: orderDirection
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *         description: Order direction
  *       - in: query
  *         name: page
  *         schema:

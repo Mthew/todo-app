@@ -8,7 +8,11 @@ import {
   DeleteTaskUseCase,
   CompleteTaskUseCase,
 } from "../../application/use-cases/task";
-import { CreateTaskDTO, UpdateTaskDTO } from "../../application/dtos/task.dto";
+import {
+  CreateTaskDTO,
+  UpdateTaskDTO,
+  TaskFilterSchema,
+} from "../../application/dtos/task.dto";
 import { UnauthorizedError } from "../../utils/AppError";
 import { Tag } from "domain/entities";
 
@@ -52,9 +56,52 @@ export class TaskController {
       throw new UnauthorizedError("User not authenticated.");
     }
 
-    const tasks = await this.getTasksByUserUseCase.execute(req.user.id);
+    // Check if any filter parameters are provided
+    const hasFilters = Object.keys(req.query).length > 0;
 
-    res.status(StatusCodes.OK).json(tasks.map(this.formatTaskResponse));
+    // Parse and validate filter parameters
+    const filterData = {
+      completed:
+        req.query.completed === "true"
+          ? true
+          : req.query.completed === "false"
+            ? false
+            : undefined,
+      priority: req.query.priority as string,
+      categoryId: req.query.categoryId
+        ? parseInt(req.query.categoryId as string)
+        : undefined,
+      dueDateFrom: req.query.dueDateFrom
+        ? new Date(req.query.dueDateFrom as string)
+        : undefined,
+      dueDateTo: req.query.dueDateTo
+        ? new Date(req.query.dueDateTo as string)
+        : undefined,
+      search: req.query.search as string,
+      orderBy: (req.query.orderBy as string) || "createdAt",
+      orderDirection: (req.query.orderDirection as string) || "desc",
+      page: req.query.page ? parseInt(req.query.page as string) : 1,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+    };
+
+    // Validate the filter data
+    const filters = TaskFilterSchema.parse(filterData);
+
+    // Use filtered query
+    const result = await this.getTasksByUserUseCase.execute(
+      req.user.id,
+      filters
+    );
+
+    res.status(StatusCodes.OK).json({
+      tasks: result.tasks.map(this.formatTaskResponse),
+      pagination: {
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+        totalPages: result.totalPages,
+      },
+    });
   }
 
   public async update(req: Request, res: Response): Promise<void> {

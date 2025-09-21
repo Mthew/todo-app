@@ -2,6 +2,7 @@ import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller";
 import { protect } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validator.middleware";
+import { rateLimitMiddleware } from "../middlewares/rate-limit.middleware";
 import {
   RegisterUserSchema,
   LoginSchema,
@@ -46,6 +47,7 @@ const authController = new AuthController();
  */
 authRouter.post(
   "/register",
+  rateLimitMiddleware.registration,
   validate(RegisterUserSchema),
   authController.register
 );
@@ -90,7 +92,12 @@ authRouter.post(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-authRouter.post("/login", validate(LoginSchema), authController.login);
+authRouter.post(
+  "/login",
+  rateLimitMiddleware.auth,
+  validate(LoginSchema),
+  authController.login
+);
 
 /**
  * @swagger
@@ -121,6 +128,11 @@ authRouter.post("/login", validate(LoginSchema), authController.login);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-authRouter.get("/profile", protect, authController.getProfile);
+authRouter.get(
+  "/profile",
+  rateLimitMiddleware.general,
+  protect,
+  authController.getProfile
+);
 
 export { authRouter };

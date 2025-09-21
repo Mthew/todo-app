@@ -1,5 +1,6 @@
 import { ITaskRepository } from "../../../../application/ports/ITaskRepository";
 import { Task } from "../../../../domain/entities";
+import { TaskFilterDTO } from "../../../../application/dtos/task.dto";
 import { prisma } from "../PrismaClient";
 import { TaskMapper } from "../mappers/TaskMapper";
 
@@ -68,5 +69,87 @@ export class PrismaTaskRepository implements ITaskRepository {
 
   async delete(id: number): Promise<void> {
     await prisma.task.delete({ where: { id } });
+  }
+
+  async findByUserIdWithFilters(
+    userId: number,
+    filters: TaskFilterDTO
+  ): Promise<{ tasks: Task[]; total: number }> {
+    const where: any = { userId };
+
+    // Text search in title and description
+    if (filters.search) {
+      where.OR = [
+        {
+          title: {
+            contains: filters.search,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: filters.search,
+            mode: "insensitive",
+          },
+        },
+      ];
+    }
+
+    // Status filter
+    if (filters.completed !== undefined) {
+      where.completed = filters.completed;
+    }
+
+    // Priority filter
+    if (filters.priority) {
+      where.priority = filters.priority;
+    }
+
+    // Category filter
+    if (filters.categoryId) {
+      where.categoryId = filters.categoryId;
+    }
+
+    // Date range filters
+    if (filters.dueDateFrom || filters.dueDateTo) {
+      where.dueDate = {};
+      if (filters.dueDateFrom) {
+        where.dueDate.gte = new Date(filters.dueDateFrom);
+      }
+      if (filters.dueDateTo) {
+        where.dueDate.lte = new Date(filters.dueDateTo);
+      }
+    }
+
+    // Build orderBy clause
+    const orderBy: any = {};
+    if (filters.orderBy) {
+      const direction = filters.orderDirection || "asc";
+      orderBy[filters.orderBy] = direction;
+    } else {
+      // Default order by createdAt desc
+      orderBy.createdAt = "desc";
+    }
+
+    // Calculate skip for pagination
+    const skip =
+      filters.page && filters.limit ? (filters.page - 1) * filters.limit : 0;
+
+    // Execute count and data queries
+    const [total, tasks] = await Promise.all([
+      prisma.task.count({ where }),
+      prisma.task.findMany({
+        where,
+        include: taskInclude,
+        orderBy,
+        skip,
+        take: filters.limit,
+      }),
+    ]);
+
+    return {
+      tasks: tasks.map(TaskMapper.toDomain),
+      total,
+    };
   }
 }

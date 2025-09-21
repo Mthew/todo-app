@@ -2,12 +2,14 @@ import { Router } from "express";
 import { TagController } from "../controllers/tag.controller";
 import { protect } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validator.middleware";
+import { rateLimitMiddleware } from "../middlewares/rate-limit.middleware";
 import { CreateTagSchema } from "../../application/dtos/tag.dto";
 
 const tagRouter = Router();
 const tagController = new TagController();
 
-// All tag routes are protected
+// All tag routes are protected and rate limited
+tagRouter.use(rateLimitMiddleware.crud);
 tagRouter.use(protect);
 
 /**

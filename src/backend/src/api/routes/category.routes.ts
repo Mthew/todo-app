@@ -2,6 +2,7 @@ import { Router } from "express";
 import { CategoryController } from "../controllers/category.controller";
 import { protect } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validator.middleware";
+import { rateLimitMiddleware } from "../middlewares/rate-limit.middleware";
 import {
   CreateCategorySchema,
   UpdateCategorySchema,
@@ -10,7 +11,8 @@ import {
 const categoryRouter = Router();
 const categoryController = new CategoryController();
 
-// All category routes are protected
+// All category routes are protected and rate limited
+categoryRouter.use(rateLimitMiddleware.crud);
 categoryRouter.use(protect);
 
 /**

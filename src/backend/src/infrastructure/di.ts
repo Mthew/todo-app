@@ -16,7 +16,6 @@ import {
   RegisterUserUseCase,
   GetUserByIdUseCase,
 } from "../application/use-cases/auth";
-
 import {
   CompleteTaskUseCase,
   CreateTaskUseCase,

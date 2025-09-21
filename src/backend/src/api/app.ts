@@ -4,6 +4,7 @@ import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
 import { apiRouter } from "./routes";
 import { errorHandler } from "./middlewares/error.handler";
+import { rateLimitMiddleware } from "./middlewares/rate-limit.middleware";
 import { specs } from "../config/swagger.config";
 
 const app = express();
@@ -12,6 +13,9 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 app.use(helmet());
+
+// Global rate limiting - applies to all routes
+app.use(rateLimitMiddleware.general);
 
 // Swagger Documentation
 app.use(
