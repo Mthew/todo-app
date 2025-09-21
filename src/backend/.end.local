@@ -1,0 +1,2 @@
+DATABASE_URL=postgresql://postgres:hiiKt1TjQbNjYdfi@db.ikdsptyxpnofhaeggyoo.supabase.co:5432/postgres
+JWT_SECRET="YOUR_SUPER_SECRET_KEY"

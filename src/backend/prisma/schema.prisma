@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+
+  tasks      Task[]
+  categories Category[]
+  tags       Tag[]
+
+  @@map("usuarios")
+}
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  completed   Boolean   @default(false)
+  priority    Priority  @default(media)
+  dueDate     DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  Int?
+
+  tags TaskTag[]
+
+  @@map("tareas")
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  tasks Task[]
+
+  @@unique([userId, name])
+  @@map("categorias")
+}
+
+model Tag {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  tasks TaskTag[]
+  
+  @@unique([userId, name])
+  @@map("etiquetas")
+}
+
+model TaskTag {
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId Int
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId  Int
+
+  @@id([taskId, tagId])
+  @@map("tarea_etiquetas")
+}
+
+enum Priority {
+  baja
+  media
+  alta
+}
