@@ -44,6 +44,7 @@ app.get("/", (req, res) => {
       auth: "/api/auth",
       tasks: "/api/tasks",
       tags: "/api/tags",
+      category: "/api/category",
     },
   });
 });

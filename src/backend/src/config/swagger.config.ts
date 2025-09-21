@@ -378,9 +378,69 @@ const options: Options = {
           },
         },
         TagsResponse: {
-          type: "array",
-          items: {
-            $ref: "#/components/schemas/Tag",
+          type: "object",
+          properties: {
+            success: {
+              type: "boolean",
+              example: true,
+            },
+            message: {
+              type: "string",
+              example: "Tags retrieved successfully",
+            },
+            data: {
+              type: "array",
+              items: {
+                $ref: "#/components/schemas/Tag",
+              },
+            },
+          },
+        },
+        // Category schemas
+        CreateCategoryRequest: {
+          type: "object",
+          required: ["name"],
+          properties: {
+            name: {
+              type: "string",
+              minLength: 1,
+              maxLength: 50,
+              example: "Work Projects",
+              description: "Category name",
+            },
+          },
+        },
+        UpdateCategoryRequest: {
+          type: "object",
+          required: ["name"],
+          properties: {
+            name: {
+              type: "string",
+              minLength: 1,
+              maxLength: 50,
+              example: "Updated Work Projects",
+              description: "Category name",
+            },
+          },
+        },
+        Category: {
+          type: "object",
+          properties: {
+            id: {
+              type: "integer",
+              example: 1,
+              description: "Category unique identifier",
+            },
+            name: {
+              type: "string",
+              example: "Work Projects",
+              description: "Category name",
+            },
+            userId: {
+              type: "integer",
+              example: 1,
+              description: "User ID who owns the category",
+            },
           },
         },
       },

@@ -3,6 +3,7 @@ import {
   PrismaUserRepository,
   PrismaTaskRepository,
   PrismaTagRepository,
+  PrismaCategoryRepository,
 } from "./database/prisma/repositories";
 
 // --- Services ---
@@ -21,6 +22,12 @@ import {
   CreateTagUseCase,
   GetTagsByUserUseCase,
 } from "../application/use-cases/tag";
+import {
+  CreateCategoryUseCase,
+  GetCategoriesByUserUseCase,
+  UpdateCategoryUseCase,
+  DeleteCategoryUseCase,
+} from "../application/use-cases/category";
 
 // A simple container map
 const container = new Map<string, any>();
@@ -35,6 +42,7 @@ container.set("authService", new JwtAuthService());
 container.set("userRepository", new PrismaUserRepository());
 container.set("taskRepository", new PrismaTaskRepository());
 container.set("tagRepository", new PrismaTagRepository());
+container.set("categoryRepository", new PrismaCategoryRepository());
 
 //#region Auth & User Use Cases
 container.set(
@@ -77,6 +85,25 @@ container.set(
 container.set(
   "getTagsByUserUseCase",
   new GetTagsByUserUseCase(container.get("tagRepository"))
+);
+//#endregion
+
+//#region Category Use Cases
+container.set(
+  "createCategoryUseCase",
+  new CreateCategoryUseCase(container.get("categoryRepository"))
+);
+container.set(
+  "getCategoriesByUserUseCase",
+  new GetCategoriesByUserUseCase(container.get("categoryRepository"))
+);
+container.set(
+  "updateCategoryUseCase",
+  new UpdateCategoryUseCase(container.get("categoryRepository"))
+);
+container.set(
+  "deleteCategoryUseCase",
+  new DeleteCategoryUseCase(container.get("categoryRepository"))
 );
 //#endregion
 
