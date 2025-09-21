@@ -1,12 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 
-import {
-  RegisterUserDTO,
-  RegisterUserUseCase,
-} from "../../application/use-cases/auth/RegisterUser.usecase";
+import { RegisterUserUseCase } from "../../application/use-cases/auth/RegisterUser.usecase";
 import { PrismaUserRepository } from "../../infrastructure/database/prisma/repositories/PrismaUserRepository";
 import { BcryptPasswordHasher } from "../../infrastructure/security/BcryptPasswordHasher";
+import { RegisterUserDTO } from "../../application/dtos/auth.dto";
 
 export class AuthController {
   // --- Manual Dependency Injection ---

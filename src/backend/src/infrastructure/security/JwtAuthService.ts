@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import {
   IAuthService,
   AuthTokenPayload,
@@ -6,7 +6,6 @@ import {
 
 export class JwtAuthService implements IAuthService {
   private readonly secret: string;
-  private readonly expiresIn: string | number = "1d";
 
   constructor() {
     this.secret = process.env.JWT_SECRET as string;
@@ -16,7 +15,8 @@ export class JwtAuthService implements IAuthService {
   }
 
   generateToken(payload: AuthTokenPayload): string {
-    return jwt.sign(payload, this.secret, { expiresIn: this.expiresIn });
+    const options: SignOptions = { expiresIn: "1d" };
+    return jwt.sign(payload, this.secret, options);
   }
 
   verifyToken(token: string): AuthTokenPayload | null {
