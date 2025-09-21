@@ -2,37 +2,43 @@ import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 
 import { RegisterUserUseCase } from "../../application/use-cases/auth/RegisterUser.usecase";
-import { PrismaUserRepository } from "../../infrastructure/database/prisma/repositories/PrismaUserRepository";
-import { BcryptPasswordHasher } from "../../infrastructure/security/BcryptPasswordHasher";
-import { RegisterUserDTO } from "../../application/dtos/auth.dto";
+import { LoginDTO, RegisterUserDTO } from "../../application/dtos/auth.dto";
+
+import { container } from "../../infrastructure/di";
+import {
+  LoginUseCase,
+  LoginResult,
+} from "../../application/use-cases/auth/Login.usecase";
 
 export class AuthController {
-  // --- Manual Dependency Injection ---
   private registerUserUseCase: RegisterUserUseCase;
+  private loginUseCase: LoginUseCase;
 
   constructor() {
-    const userRepository = new PrismaUserRepository();
-    const passwordHasher = new BcryptPasswordHasher();
-    this.registerUserUseCase = new RegisterUserUseCase(
-      userRepository,
-      passwordHasher
-    );
-    // Bind 'this' to ensure it's correct when Express calls the method
+    this.registerUserUseCase = container.get("registerUserUseCase");
+    this.loginUseCase = container.get("loginUseCase");
+
+    // Bind methods to ensure 'this' context is correct
     this.register = this.register.bind(this);
+    this.login = this.login.bind(this);
   }
-  // -----------------------------------
 
-  async register(req: Request, res: Response, next: NextFunction) {
-    try {
-      const dto: RegisterUserDTO = req.body;
-      const user = await this.registerUserUseCase.execute(dto);
+  public async register(req: Request, res: Response): Promise<void> {
+    const dto: RegisterUserDTO = req.body;
+    const user = await this.registerUserUseCase.execute(dto);
 
-      // Avoid sending password hash to client
-      const userResponse = { id: user.id, email: user.email, name: user.name };
+    // DTO for the response to avoid leaking sensitive data like passwordHash
+    const responseDto = { id: user.id, name: user.name, email: user.email };
 
-      res.status(StatusCodes.CREATED).json(userResponse);
-    } catch (error) {
-      next(error);
-    }
+    res.status(StatusCodes.CREATED).json(responseDto);
+  }
+
+  public async login(req: Request, res: Response): Promise<void> {
+    const dto: LoginDTO = req.body;
+    const { user, token }: LoginResult = await this.loginUseCase.execute(dto);
+
+    const userResponse = { id: user.id, name: user.name, email: user.email };
+
+    res.status(StatusCodes.OK).json({ user: userResponse, token });
   }
 }

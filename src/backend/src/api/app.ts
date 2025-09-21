@@ -1,35 +1,21 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
+import "express-async-errors"; // Must be imported before your routes
 import cors from "cors";
 import helmet from "helmet";
-import { StatusCodes } from "http-status-codes";
 import { apiRouter } from "./routes";
+import { errorHandler } from "./middlewares/error.handler";
 
 const app = express();
 
+// Core Middlewares
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
 
-// Main router
+// API Routes
 app.use("/api", apiRouter);
 
-// Global error handler middleware
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error("Global Error Handler:", error);
-
-  // If response already sent, delegate to default Express error handler
-  if (res.headersSent) {
-    return next(error);
-  }
-
-  // Send error response
-  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    error: "Internal Server Error",
-    message:
-      process.env.NODE_ENV === "development"
-        ? error.message
-        : "Something went wrong",
-  });
-});
+// Global Error Handler (must be the last middleware)
+app.use(errorHandler);
 
 export { app };
