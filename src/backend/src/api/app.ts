@@ -5,14 +5,23 @@ import swaggerUi from "swagger-ui-express";
 import { apiRouter } from "./routes";
 import { errorHandler } from "./middlewares/error.handler";
 import { rateLimitMiddleware } from "./middlewares/rate-limit.middleware";
+import { createRequestLogger } from "./middlewares/request-logger.middleware";
 import { specs } from "../config/swagger.config";
+import getLoggingConfig from "../config/logging.config";
 
 const app = express();
+
+// Initialize logging configuration
+const loggingConfig = getLoggingConfig();
+const requestLogger = createRequestLogger(loggingConfig);
 
 // Core Middlewares
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 app.use(helmet());
+
+// Request logging - should be early in middleware chain
+app.use(requestLogger);
 
 // Global rate limiting - applies to all routes
 app.use(rateLimitMiddleware.general);
