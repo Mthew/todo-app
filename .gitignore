@@ -49,6 +49,7 @@ src/*/.nuxt/
 src/*/.cache/
 src/*/.parcel-cache/
 src/*/.svelte-kit/
+src/**/node_modules/
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
