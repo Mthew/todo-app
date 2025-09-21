@@ -1,6 +1,6 @@
 import { IPasswordHasher } from "../../ports/IPasswordHasher";
 import { IUserRepository } from "../../ports/IUserRepository";
-import { User } from "../../../domain/User";
+import { User } from "../../../domain/entities/User.entity";
 
 // Using an interface for the DTO for better type-checking
 export interface RegisterUserDTO {
