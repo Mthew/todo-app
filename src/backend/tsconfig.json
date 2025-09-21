@@ -1,9 +1,22 @@
 {
-  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src",
     "outDir": "./dist",
-    "rootDir": "./"
+    "baseUrl": "./src",
+    "paths": {
+      "@/api/*": ["src/api/*"],
+      "@/application/*": ["src/application/*"],
+      "@/domain/*": ["src/domain/*"],
+      "@/infrastructure/*": ["src/infrastructure/*"]
+    },
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
   },
-  "include": ["**/*.ts"],
-  "exclude": ["dist"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }
