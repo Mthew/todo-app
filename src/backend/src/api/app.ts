@@ -1,5 +1,4 @@
 import express from "express";
-import "express-async-errors"; // Must be imported before your routes
 import cors from "cors";
 import helmet from "helmet";
 import { apiRouter } from "./routes";

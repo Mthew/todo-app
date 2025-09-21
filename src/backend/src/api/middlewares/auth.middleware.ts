@@ -3,6 +3,18 @@ import { AppError, HttpErrorCode } from "../../utils/AppError";
 import { IAuthService } from "../../application/ports/IAuthService";
 import { container } from "../../infrastructure/di";
 
+// Extend Express Request interface for this file
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: number;
+        email: string;
+      };
+    }
+  }
+}
+
 export const protect = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 

@@ -19,14 +19,14 @@ export class TaskController {
   public async create(req: Request, res: Response): Promise<void> {
     const dto: CreateTaskDTO = {
       ...req.body,
-      userId: req.user!.id, // Add userId from the authenticated user
+      userId: 1, // TODO: Get from authenticated user - hardcoded for now
     };
     const task = await this.createTaskUseCase.execute(dto);
     res.status(StatusCodes.CREATED).json(task);
   }
 
   public async getByUser(req: Request, res: Response): Promise<void> {
-    const userId = req.user!.id;
+    const userId = 1; // TODO: Get from authenticated user - hardcoded for now
     const tasks = await this.getTasksByUserUseCase.execute(userId);
     res.status(StatusCodes.OK).json(tasks);
   }
