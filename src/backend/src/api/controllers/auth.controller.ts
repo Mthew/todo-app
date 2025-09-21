@@ -5,7 +5,7 @@ import {
   RegisterUserDTO,
   RegisterUserUseCase,
 } from "../../application/use-cases/auth/RegisterUser.usecase";
-import { PrismaUserRepository } from "../../infrastructure/database/prisma/PrismaUserRepository";
+import { PrismaUserRepository } from "../../infrastructure/database/prisma/repositories/PrismaUserRepository";
 import { BcryptPasswordHasher } from "../../infrastructure/security/BcryptPasswordHasher";
 
 export class AuthController {
