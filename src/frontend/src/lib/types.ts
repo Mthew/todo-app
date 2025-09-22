@@ -1,0 +1,37 @@
+export interface Category {
+  id: number;
+  name: string;
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  description?: string;
+  priority: "baja" | "media" | "alta";
+  dueDate?: string; // ISO string format
+  completed: boolean;
+  category: Category;
+  tags?: { id: number; name: string }[];
+}
+
+export interface TaskFormData {
+  title: string;
+  description?: string;
+  priority: "baja" | "media" | "alta";
+  dueDate?: string;
+  categoryId: number;
+}
+
+export interface User {
+  id: number | null;
+  email: string;
+  name: string;
+  passwordHash: string;
+}
+
+export interface SignupFormData {
+  email: string;
+  name: string;
+  password: string;
+  confirmPassword: string;
+}

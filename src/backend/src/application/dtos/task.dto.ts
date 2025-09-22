@@ -48,10 +48,6 @@ export const TaskFilterSchema = z.object({
     .enum(["title", "priority", "dueDate", "createdAt"])
     .default("createdAt"),
   orderDirection: z.enum(["asc", "desc"]).default("desc"),
-
-  // Pagination
-  page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(100).default(10),
 });
 
 export type TaskFilterDTO = z.infer<typeof TaskFilterSchema>;
