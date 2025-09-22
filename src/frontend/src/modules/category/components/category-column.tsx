@@ -3,7 +3,7 @@
 import type { Category, Task } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TaskCard } from "./task-card";
+import { TaskCard } from "../../../components/features/board/task-card";
 
 interface CategoryColumnProps {
   category: Category;

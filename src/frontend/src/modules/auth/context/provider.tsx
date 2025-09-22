@@ -7,7 +7,6 @@ import {
   LoginData,
   RegisterData,
   LoginResponse,
-  RegisterResponse,
 } from "../types";
 import { authServices } from "../services/service";
 import { httpManager } from "@/lib/httpManager";
