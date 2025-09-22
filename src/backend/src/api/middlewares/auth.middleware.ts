@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { AppError, HttpErrorCode } from "../../utils/AppError";
+import {
+  AppError,
+  HttpErrorCode,
+  UnauthorizedError,
+} from "../../utils/AppError";
 import { IAuthService } from "../../application/ports/IAuthService";
 import { container } from "../../infrastructure/di";
 
@@ -19,7 +23,7 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return next(new AppError("No token provided.", HttpErrorCode.UNAUTHORIZED));
+    return next(new UnauthorizedError("No token provided."));
   }
 
   const token = authHeader.split(" ")[1];
@@ -29,12 +33,12 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
     const decoded = authService.verifyToken(token);
 
     if (!decoded) {
-      return next(new AppError("Invalid token.", HttpErrorCode.UNAUTHORIZED));
+      return next(new UnauthorizedError("Invalid token."));
     }
 
-    req.user = decoded; // Attach user payload to the request
+    req.user = decoded;
     next();
   } catch (error) {
-    return next(new AppError("Invalid token.", HttpErrorCode.UNAUTHORIZED));
+    return next(new UnauthorizedError("Invalid token."));
   }
 };

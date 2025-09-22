@@ -1,14 +1,19 @@
 import { Request, Response, NextFunction } from "express";
-import { ZodSchema } from "zod";
+import { ZodError, ZodType, z } from "zod";
 import { StatusCodes } from "http-status-codes";
+import { AppError, BadRequestError, HttpErrorCode } from "../../utils/AppError";
 
 export const validate =
-  (schema: ZodSchema) => (req: Request, res: Response, next: NextFunction) => {
+  (schema: ZodType) => (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.parse(req.body);
       next();
     } catch (error: any) {
-      // If validation fails, send a 400 Bad Request response with error details
+      if (error instanceof ZodError) {
+        const detailedErrors = z.treeifyError(error);
+        return next(new BadRequestError(detailedErrors));
+      }
+
       res.status(StatusCodes.BAD_REQUEST).json({
         message: "Validation failed",
         errors: error.errors,

@@ -7,7 +7,7 @@
     "install:all": "pnpm install",
     "dev:backend": "pnpm --filter backend dev",
     "dev:frontend": "pnpm --filter frontend dev",
-    "dev": "pnpm run --parallel dev:*",
+    "dev": "pnpm --parallel --recursive dev",
     "build:frontend": "pnpm --filter frontend build",
     "test": "pnpm -r test"
   },
