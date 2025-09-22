@@ -3,7 +3,10 @@
 -- Respuesta esperada: 
 /*
 
-
+{
+  "promedio_tareas_ultimo_30_dias": "5.25",
+  "promedio_tareas_30_dias_anteriores": "4.80"
+}
 
 */
 
@@ -27,7 +30,11 @@ FROM periodos;
 -- Respuesta esperada: 
 /*
 
-
+[
+  { "dia": "2023-10-27", "prioridad": "alta", "tasa_de_completado_porcentaje": "75.00" },
+  { "dia": "2023-10-27", "prioridad": "media", "tasa_de_completado_porcentaje": "82.50" },
+  { "dia": "2023-10-26", "prioridad": "alta", "tasa_de_completado_porcentaje": "60.00" }
+]
 
 */
 
@@ -52,7 +59,11 @@ ORDER BY dia DESC, prioridad;
 -- Respuesta esperada: 
 /*
 
-
+[
+  { "categoria": "Proyectos Personales", "tasa_de_completado_porcentaje": "95.20", "tiempo_promedio_completado": "3 days 04:15:22" },
+  { "categoria": "Trabajo", "tasa_de_completado_porcentaje": "88.60", "tiempo_promedio_completado": "1 day 12:30:00" },
+  { "categoria": "Estudios", "tasa_de_completado_porcentaje": "75.00", "tiempo_promedio_completado": "5 days 08:00:00" }
+]
 
 */
 
@@ -77,7 +88,10 @@ ORDER BY tasa_de_completado_porcentaje DESC;
 -- Respuesta esperada: 
 /*
 
-
+{
+  "pico_creacion": "Día: 2, Hora: 10",
+  "pico_completado": "Día: 5, Hora: 16"
+}
 
 */
 
@@ -109,7 +123,10 @@ SELECT
 -- Respuesta esperada: 
 /*
 
-
+[
+  { "usuario": "Juan Pérez", "categoria": "Trabajo", "tareas_vencidas": "5", "promedio_dias_vencida": "12 días" },
+  { "usuario": "Ana Gómez", "categoria": "Proyectos Personales", "tareas_vencidas": "3", "promedio_dias_vencida": "8 días" }
+]
 
 */
 
@@ -132,7 +149,10 @@ ORDER BY tareas_vencidas DESC;
 -- Respuesta esperada: 
 /*
 
-
+{
+  "etiqueta_mas_frecuente": "Urgente",
+  "etiqueta_mayor_completado": "ProyectoX"
+}
 
 */
 
@@ -168,7 +188,12 @@ SELECT
 -- Respuesta esperada: 
 /*
 
-
+{
+  "usuarios_activos_4_semanas": "15",
+  "retencion_s1_a_s2": "85.50",
+  "retencion_s2_a_s3": "90.10",
+  "retencion_s3_a_s4": "88.75"
+}
 
 */
 
@@ -203,7 +228,11 @@ FROM cohortes_semanales;
 -- Respuesta esperada: 
 /*
 
-
+[
+  { "prioridad": "media", "numero_de_tareas": "150" },
+  { "prioridad": "alta", "numero_de_tareas": "75" },
+  { "prioridad": "baja", "numero_de_tareas": "30" }
+]
 
 */
 
@@ -227,7 +256,11 @@ ORDER BY numero_de_tareas DESC;
 -- Respuesta esperada: 
 /*
 
-
+[
+  { "mes": "2022-11", "tareas_creadas": "500", "tareas_completadas": "450" },
+  { "mes": "2022-12", "tareas_creadas": "420", "tareas_completadas": "380" },
+  { "mes": "2023-01", "tareas_creadas": "600", "tareas_completadas": "550" }
+]
 
 */
 

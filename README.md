@@ -19,6 +19,8 @@ This full-stack todo application was built to demonstrate modern web development
 - **Responsive Design** for desktop and mobile
 - **Production-ready** with comprehensive logging and rate limiting
 
+![Todo App Frontend](./doc/frontend.png)
+
 ## 🏗️ Architecture
 
 ### Monorepo Structure
@@ -106,13 +108,38 @@ todo-app/
 
    **Backend** (`src/backend/.env`):
 
+   Copy the example environment file and customize it:
+
+   ```bash
+   cp src/backend/example.env.txt src/backend/.env
+   ```
+
+   Or create manually with these variables:
+
    ```env
    DATABASE_URL="postgresql://todo_user:your_password@localhost:5432/todo_app"
    JWT_SECRET="your-super-secret-jwt-key-here"
    PORT=3001
    NODE_ENV="development"
    FRONTEND_URL="http://localhost:3000"
+
+   # Logging Configuration
+   LOGGING_ENABLED=true
+   LOG_LEVEL=standard
+   LOG_INCLUDE_BODY=false
+   LOG_INCLUDE_HEADERS=false
+   LOG_INCLUDE_USER_INFO=true
+   LOG_COLOR_OUTPUT=true
+
+   # Performance Thresholds
+   SLOW_REQUEST_THRESHOLD=5000
+   WARNING_REQUEST_THRESHOLD=1000
+
+   # Exclusions
+   LOG_EXCLUDE_PATHS=/health,/metrics
    ```
+
+   📋 **Environment Template**: A complete example is available at [`src/backend/example.env.txt`](./src/backend/example.env.txt)
 
    **Frontend** (`src/frontend/.env.local`):
 
@@ -131,7 +158,29 @@ todo-app/
    cd ../..
    ```
 
-6. **Start development servers**
+6. **Seed the database with sample data (Optional)**
+
+   To populate your database with realistic sample data for testing:
+
+   ```bash
+   # Connect to your PostgreSQL database and run the seed script
+   psql -U todo_user -d todo_app -f collection/seed.sql
+   ```
+
+   **🔑 Default Login Credentials:**
+
+   - **Email**: `john.doe@example.com`
+   - **Password**: `password123`
+
+   **📊 Sample Data Generated:**
+
+   - 21 users (including the default user)
+   - 1,050+ tasks with realistic data
+   - Categories and tags for each user
+   - Tasks with various priorities, due dates, and completion statuses
+   - **All users have the same password**: `password123`
+
+7. **Start development servers**
 
    ```bash
    # Start both frontend and backend
@@ -278,6 +327,43 @@ User (usuarios) ──┐
 - `POST /api/tags` - Create tag
 
 **Interactive API Documentation**: Visit `http://localhost:3001/api-docs` when running in development.
+
+## 🎯 Test Data & Sample Users
+
+The project includes a comprehensive seed script (`collection/seed.sql`) that populates the database with realistic sample data for testing and demonstration purposes.
+
+### 🔑 Quick Login Credentials
+
+**Default User:**
+
+- **Email**: `john.doe@example.com`
+- **Password**: `password123`
+
+**Additional Test Users:**
+
+- All generated users have the password: `password123`
+- Usernames follow the pattern: `usuario1@ejemplo.com`, `usuario2@ejemplo.com`, etc.
+
+### 📊 Sample Data Overview
+
+Running the seed script generates:
+
+- **21 users** (1 default + 20 generated users)
+- **1,050+ tasks** with realistic distribution across users
+- **Multiple categories** per user (Trabajo, Personal, Estudios)
+- **Various tags** for task organization (Urgente, Proyecto Alfa, etc.)
+- **Different productivity patterns** (some users complete more tasks than others)
+- **Realistic timestamps** spanning the last year
+- **Mixed priorities** (baja, media, alta) and completion statuses
+
+### 🚀 Running the Seed Script
+
+```bash
+# After setting up your database and running migrations
+psql -U todo_user -d todo_app -f collection/seed.sql
+```
+
+**Note**: The seed script is idempotent and can be safely run multiple times. It will clear existing data and regenerate fresh sample data.
 
 ## 🚨 Troubleshooting
 

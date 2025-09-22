@@ -32,6 +32,9 @@ BEGIN
   RAISE NOTICE 'Limpiando la base de datos...';
   TRUNCATE TABLE usuarios, categorias, etiquetas, tareas, tarea_etiquetas RESTART IDENTITY CASCADE;
 
+    INSERT INTO "usuarios" ("name", "email", "password")
+    VALUES ('John Doe', 'john.doe@example.com', '$2b$10$ft7KOJkoYPRQ9NhFgKzvrubRd1UbNGYQEwpNTgwnP1ZgmoE.lZBBa');
+
   -- 1. CREAR USUARIOS
   -- =================
   RAISE NOTICE 'Creando % usuarios...', num_users;
@@ -41,7 +44,7 @@ BEGIN
       'Usuario ' || i,
       'usuario' || i || '@ejemplo.com',
       -- En un proyecto real, esto sería un hash de bcrypt
-      'password_hasheado_estatico' 
+      '$2b$10$ft7KOJkoYPRQ9NhFgKzvrubRd1UbNGYQEwpNTgwnP1ZgmoE.lZBBa' 
     );
   END LOOP;
 
