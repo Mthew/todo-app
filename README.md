@@ -210,6 +210,7 @@ todo-app/
 - Protected routes with automatic token refresh
 - Secure password hashing with bcrypt
 - Persistent sessions with localStorage
+- **User Isolation**: Users can only view and edit their own tasks, categories, and tags
 
 ### 📝 Task Management
 
@@ -268,6 +269,7 @@ User (usuarios) ──┐
 **Key Features:**
 
 - User isolation (all data belongs to specific users)
+- **Privacy Protection**: Users can only view and edit their own tasks, categories, and tags
 - Many-to-many relationship between tasks and tags
 - Optional category assignment for tasks
 - Cascade deletion for data integrity
@@ -297,6 +299,7 @@ User (usuarios) ──┐
 - **CORS Configuration**: Secure cross-origin resource sharing
 - **SQL Injection Prevention**: Parameterized queries with Prisma
 - **XSS Protection**: Input sanitization and validation
+- **Data Isolation**: Users can only access, view, and modify their own data (tasks, categories, tags)
 
 ## 🌐 API Endpoints
 
