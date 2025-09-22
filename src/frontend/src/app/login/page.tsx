@@ -2,22 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SignupForm } from "@/modules/auth";
+import { LoginForm } from "@/modules/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export default function SignupPage() {
+export default function LoginPage() {
   const router = useRouter();
 
-  const handleSignupSuccess = () => {
-    // Redirect to dashboard or home page after successful signup
+  const handleLoginSuccess = () => {
+    // Redirect to dashboard or home page after successful login
     router.push("/board");
   };
 
-  const handleLoginClick = () => {
-    // Navigate to login page or show login form
-    router.push("/login");
+  const handleSignupClick = () => {
+    // Navigate to signup page
+    router.push("/signup");
   };
 
   return (
@@ -36,13 +36,13 @@ export default function SignupPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-center text-2xl font-bold">
-              Create Your Account
+              Welcome Back
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <SignupForm
-              onSuccess={handleSignupSuccess}
-              onLoginClick={handleLoginClick}
+            <LoginForm
+              onSuccess={handleLoginSuccess}
+              onSignupClick={handleSignupClick}
             />
           </CardContent>
         </Card>

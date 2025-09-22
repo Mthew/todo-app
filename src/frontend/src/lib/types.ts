@@ -22,11 +22,22 @@ export interface TaskFormData {
   categoryId: number;
 }
 
+// Authentication related types
 export interface User {
-  id: number | null;
+  id: number;
   email: string;
   name: string;
-  passwordHash: string;
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
 }
 
 export interface SignupFormData {
@@ -34,4 +45,22 @@ export interface SignupFormData {
   name: string;
   password: string;
   confirmPassword: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+}
+
+export interface LoginResponse {
+  user: User;
+  token: string;
+}
+
+export interface RegisterResponse {
+  id: number;
+  name: string;
+  email: string;
 }
