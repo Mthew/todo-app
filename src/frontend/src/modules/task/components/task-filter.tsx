@@ -17,7 +17,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Filter, ChevronDown, X } from "lucide-react";
+import { Filter, ChevronDown, X, Loader2 } from "lucide-react";
 import type { TaskFilterFormData } from "../types";
 import type { Category } from "@/modules/category";
 
@@ -25,12 +25,14 @@ interface TaskFilterProps {
   filter: TaskFilterFormData;
   onFilterChange: (filter: TaskFilterFormData) => void;
   categories: Category[];
+  isLoading?: boolean;
 }
 
 export function TaskFilter({
   filter,
   onFilterChange,
   categories,
+  isLoading = false,
 }: TaskFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -55,14 +57,19 @@ export function TaskFilter({
   );
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
         <Button
           variant="outline"
-          className="w-full justify-between mb-4 bg-transparent"
+          className="justify-between mb-4 bg-transparent"
+          disabled={isLoading}
         >
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Filter className="h-4 w-4" />
+            )}
             Filter Tasks
             {hasActiveFilters && (
               <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
@@ -78,7 +85,12 @@ export function TaskFilter({
         </Button>
       </CollapsibleTrigger>
 
-      <CollapsibleContent className="space-y-4 p-4 border rounded-lg bg-card">
+      <CollapsibleContent className="space-y-4 p-4 border rounded-lg bg-card relative mb-4">
+        {isLoading && (
+          <div className="absolute inset-0 bg-background/50 flex items-center justify-center rounded-lg z-10">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium">Filter Options</h3>
           {hasActiveFilters && (

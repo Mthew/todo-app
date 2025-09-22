@@ -22,6 +22,7 @@ export { taskServices } from "./services/service";
 export type {
   Task,
   TaskFormData,
+  TaskFilterFormData,
   TaskResponse,
   TasksResponse,
   Priority,

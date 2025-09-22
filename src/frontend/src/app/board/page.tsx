@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, FolderPlus } from "lucide-react";
@@ -17,12 +17,135 @@ import {
   Task,
   TaskFormData,
   TaskFilter,
+  TaskFilterFormData,
 } from "@/modules/task";
 
 export default function BoardPage() {
   const { state: categoryState, deleteCategory } = useCategory();
 
-  const { state: taskState, createTask, updateTask, deleteTask } = useTask();
+  const {
+    state: taskState,
+    createTask,
+    updateTask,
+    deleteTask,
+    fetchTasks,
+  } = useTask();
+
+  // Filter state
+  const [filter, setFilter] = useState<TaskFilterFormData>({
+    orderBy: "createdAt",
+    orderDirection: "desc",
+  });
+
+  // Apply filters to tasks (hybrid approach)
+  const filteredTasks = useMemo(() => {
+    // If data is already server-filtered, return as-is
+    if (taskState.isServerFiltered) {
+      return taskState.tasks;
+    }
+
+    // Otherwise, apply client-side filtering for immediate feedback
+    let filtered = [...taskState.tasks];
+
+    // Search filter
+    if (filter.search) {
+      const searchLower = filter.search.toLowerCase();
+      filtered = filtered.filter(
+        (task) =>
+          task.title.toLowerCase().includes(searchLower) ||
+          task.description?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Priority filter
+    if (filter.priority) {
+      filtered = filtered.filter((task) => task.priority === filter.priority);
+    }
+
+    // Category filter (for global filtering, we'll handle this separately in category columns)
+    if (filter.categoryId) {
+      filtered = filtered.filter(
+        (task) => task.categoryId === filter.categoryId
+      );
+    }
+
+    // Completed status filter
+    if (filter.completed !== undefined) {
+      filtered = filtered.filter((task) => task.completed === filter.completed);
+    }
+
+    // Due date range filter
+    if (filter.dueDateFrom) {
+      filtered = filtered.filter((task) => {
+        if (!task.dueDate) return false;
+        const taskDate = new Date(task.dueDate);
+        return taskDate >= filter.dueDateFrom!;
+      });
+    }
+
+    if (filter.dueDateTo) {
+      filtered = filtered.filter((task) => {
+        if (!task.dueDate) return false;
+        const taskDate = new Date(task.dueDate);
+        return taskDate <= filter.dueDateTo!;
+      });
+    }
+
+    // Sorting
+    filtered.sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (filter.orderBy) {
+        case "title":
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        case "priority":
+          const priorityOrder = { baja: 1, media: 2, alta: 3 };
+          aValue = priorityOrder[a.priority];
+          bValue = priorityOrder[b.priority];
+          break;
+        case "dueDate":
+          aValue = a.dueDate ? new Date(a.dueDate) : new Date(0);
+          bValue = b.dueDate ? new Date(b.dueDate) : new Date(0);
+          break;
+        case "createdAt":
+        default:
+          // Assuming newer tasks have higher IDs (common pattern)
+          aValue = a.id;
+          bValue = b.id;
+          break;
+      }
+
+      if (aValue < bValue) return filter.orderDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return filter.orderDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [taskState.tasks, taskState.isServerFiltered, filter]);
+
+  // Effect to fetch tasks with server-side filtering
+  useEffect(() => {
+    // Debounce filter changes to avoid too many API calls
+    const timeoutId = setTimeout(() => {
+      // Check if we have any filters that warrant server-side filtering
+      const hasFilters = Boolean(
+        filter.search ||
+          filter.priority ||
+          filter.categoryId ||
+          filter.completed !== undefined ||
+          filter.dueDateFrom ||
+          filter.dueDateTo
+      );
+
+      // Always fetch with filters for server-side filtering
+      fetchTasks(filter);
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [filter, fetchTasks]);
 
   // Dialog states
   const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false);
@@ -75,10 +198,10 @@ export default function BoardPage() {
   };
 
   const getTasksByCategory = (categoryId: number) => {
-    const filteredTasks = taskState.tasks.filter(
+    const categoryTasks = filteredTasks.filter(
       (task: Task) => task.categoryId === categoryId
     );
-    return convertTasksForDisplay(filteredTasks, categoryId);
+    return convertTasksForDisplay(categoryTasks, categoryId);
   };
 
   const convertTaskForEdit = (task: Task | null) => {
@@ -135,7 +258,8 @@ export default function BoardPage() {
       <TaskFilter
         filter={filter}
         onFilterChange={setFilter}
-        categories={categories}
+        categories={categoryState.categories}
+        isLoading={taskState.isLoading}
       />
       {error && (
         <Alert className="mb-6" variant="destructive">
@@ -143,7 +267,7 @@ export default function BoardPage() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-x-40 ">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-x-30 ">
         {categoryState.categories.map((category: Category) => (
           <CategoryColumn
             key={category.id}

@@ -2,7 +2,7 @@
 
 import React, { createContext, useReducer, useEffect, ReactNode } from "react";
 import { taskServices } from "../services/service";
-import { Task, TaskFormData } from "../types";
+import { Task, TaskFormData, TaskFilterFormData } from "../types";
 import { useAuth } from "../../auth";
 
 // State interface
@@ -10,12 +10,14 @@ interface TaskState {
   tasks: Task[];
   isLoading: boolean;
   error: string | null;
+  currentFilters?: TaskFilterFormData;
+  isServerFiltered: boolean;
 }
 
 // Action types for the reducer
 type TaskAction =
   | { type: "FETCH_START" }
-  | { type: "FETCH_SUCCESS"; payload: Task[] }
+  | { type: "FETCH_SUCCESS"; payload: Task[]; filters?: TaskFilterFormData }
   | { type: "FETCH_ERROR"; payload: string }
   | { type: "CREATE_SUCCESS"; payload: Task }
   | { type: "UPDATE_SUCCESS"; payload: Task }
@@ -28,6 +30,8 @@ const initialState: TaskState = {
   tasks: [],
   isLoading: false,
   error: null,
+  currentFilters: undefined,
+  isServerFiltered: false,
 };
 
 // Task reducer
@@ -45,6 +49,8 @@ function taskReducer(state: TaskState, action: TaskAction): TaskState {
         tasks: action.payload,
         isLoading: false,
         error: null,
+        currentFilters: action.filters,
+        isServerFiltered: !!action.filters,
       };
     case "FETCH_ERROR":
       return {
@@ -93,7 +99,7 @@ function taskReducer(state: TaskState, action: TaskAction): TaskState {
 // Context interface
 interface TaskContextType {
   state: TaskState;
-  fetchTasks: () => Promise<void>;
+  fetchTasks: (filters?: TaskFilterFormData) => Promise<void>;
   createTask: (data: TaskFormData) => Promise<Task>;
   updateTask: (id: number, data: TaskFormData) => Promise<Task>;
   deleteTask: (id: number) => Promise<void>;
@@ -114,17 +120,34 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
   const { state: authState } = useAuth();
 
+  // Helper function to check if filters have changed
+  const filtersChanged = (
+    newFilters?: TaskFilterFormData,
+    currentFilters?: TaskFilterFormData
+  ): boolean => {
+    if (!newFilters && !currentFilters) return false;
+    if (!newFilters || !currentFilters) return true;
+
+    return JSON.stringify(newFilters) !== JSON.stringify(currentFilters);
+  };
+
   // Fetch all tasks
-  const fetchTasks = async (): Promise<void> => {
+  const fetchTasks = async (filters?: TaskFilterFormData): Promise<void> => {
+    // Skip if filters haven't changed
+    if (!filtersChanged(filters, state.currentFilters)) {
+      return;
+    }
+
     try {
       dispatch({ type: "FETCH_START" });
 
-      const response = await taskServices.getAll();
+      const response = await taskServices.getAll(filters);
       const tasks = (response.data as any).tasks || response.data;
 
       dispatch({
         type: "FETCH_SUCCESS",
         payload: Array.isArray(tasks) ? tasks : [tasks],
+        filters: filters,
       });
     } catch (error: any) {
       console.error("Failed to fetch tasks:", error);
