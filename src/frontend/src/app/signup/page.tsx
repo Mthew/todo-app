@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SignupForm } from "@/modules/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

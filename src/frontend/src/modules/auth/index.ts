@@ -18,3 +18,14 @@ export { AuthHeader } from "./components/AuthHeader";
 
 // Services
 export { authServices } from "./services/service";
+
+// Types
+export type {
+  User,
+  LoginData,
+  RegisterData,
+  SignupFormData,
+  AuthState,
+  LoginResponse,
+  RegisterResponse,
+} from "./types";

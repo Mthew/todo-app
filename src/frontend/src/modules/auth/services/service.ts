@@ -4,7 +4,7 @@ import {
   RegisterData,
   LoginResponse,
   RegisterResponse,
-} from "@/lib/types";
+} from "../types";
 
 export const authServices = {
   login: async (credentials: LoginData) => {

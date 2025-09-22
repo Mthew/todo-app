@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { SignupFormData } from "@/lib/types";
+import { SignupFormData } from "../types";
 
 interface SignupFormProps {
   onSuccess?: () => void;
@@ -92,7 +92,6 @@ export const SignupForm: React.FC<SignupFormProps> = ({
     } catch (error: any) {
       console.error("Signup error:", error);
 
-      // Handle specific error messages from the backend
       if (error?.status === 409) {
         setSubmitError(
           "An account with this email already exists. Please use a different email or try logging in."

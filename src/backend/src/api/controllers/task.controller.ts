@@ -56,9 +56,6 @@ export class TaskController {
       throw new UnauthorizedError("User not authenticated.");
     }
 
-    // Check if any filter parameters are provided
-    const hasFilters = Object.keys(req.query).length > 0;
-
     // Parse and validate filter parameters
     const filterData = {
       completed:

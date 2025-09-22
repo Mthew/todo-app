@@ -8,7 +8,7 @@ import {
   RegisterData,
   LoginResponse,
   RegisterResponse,
-} from "@/lib/types";
+} from "../types";
 import { authServices } from "../services/service";
 import { httpManager } from "@/lib/httpManager";
 
@@ -140,11 +140,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: RegisterData): Promise<void> => {
     try {
       dispatch({ type: "AUTH_START" });
+      await authServices.signup(userData);
 
-      const response = await authServices.signup(userData);
-      const userResponse = response.data as RegisterResponse;
-
-      // After successful registration, log the user in
       await login({ email: userData.email, password: userData.password });
     } catch (error) {
       dispatch({ type: "AUTH_ERROR" });
