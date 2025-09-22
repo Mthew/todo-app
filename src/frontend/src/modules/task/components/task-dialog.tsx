@@ -3,7 +3,8 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import type { Task, Category, TaskFormData } from "@/lib/types";
+import type { Task, TaskFormData } from "../types";
+import type { Category } from "@/modules/category";
 import {
   Dialog,
   DialogContent,
@@ -50,7 +51,7 @@ export function TaskDialog({
     title: "",
     description: "",
     priority: "media",
-    dueDate: "",
+    dueDate: undefined,
     categoryId: categories[0]?.id || 1,
   });
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -61,8 +62,8 @@ export function TaskDialog({
         title: task.title,
         description: task.description || "",
         priority: task.priority,
-        dueDate: task.dueDate || "",
-        categoryId: task.category.id,
+        dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+        categoryId: task.categoryId || categories[0]?.id || 1,
       });
       if (task.dueDate) {
         setSelectedDate(new Date(task.dueDate));
@@ -72,7 +73,7 @@ export function TaskDialog({
         title: "",
         description: "",
         priority: "media",
-        dueDate: "",
+        dueDate: undefined,
         categoryId: categories[0]?.id || 1,
       });
       setSelectedDate(undefined);
@@ -83,7 +84,7 @@ export function TaskDialog({
     e.preventDefault();
     onSubmit({
       ...formData,
-      dueDate: selectedDate ? selectedDate.toISOString() : undefined,
+      dueDate: selectedDate,
     });
     onOpenChange(false);
   };
@@ -92,7 +93,7 @@ export function TaskDialog({
     setSelectedDate(date);
     setFormData((prev) => ({
       ...prev,
-      dueDate: date ? date.toISOString() : "",
+      dueDate: date,
     }));
   };
 
@@ -136,7 +137,11 @@ export function TaskDialog({
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
               <Select
-                value={formData.categoryId.toString()}
+                value={(
+                  formData.categoryId ||
+                  categories[0]?.id ||
+                  1
+                ).toString()}
                 onValueChange={(value) =>
                   setFormData((prev) => ({
                     ...prev,

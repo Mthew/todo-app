@@ -1,6 +1,5 @@
 "use client";
 
-import type { Task } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Calendar, MoreHorizontal, FilePen, Trash2 } from "lucide-react";
 import { format, isAfter } from "date-fns";
+import { Task } from "../types";
 
 interface TaskCardProps {
   task: Task;

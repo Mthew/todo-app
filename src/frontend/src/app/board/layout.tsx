@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { MainNavbar } from "@/components/common/main-navbar";
-import { AuthHeader, ProtectedRoute } from "@/modules/auth";
+import { ProtectedRoute } from "@/modules/auth";
 
 interface BoardLayoutProps {
   children: ReactNode;

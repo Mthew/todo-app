@@ -7,6 +7,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/common/theme-provider";
 import { AuthProvider } from "@/modules/auth";
 import { CategoryProvider } from "@/modules/category";
+import { TaskProvider } from "@/modules/task";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -26,14 +27,16 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <AuthProvider>
             <CategoryProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="dark"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {children}
-              </ThemeProvider>
+              <TaskProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="dark"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  {children}
+                </ThemeProvider>
+              </TaskProvider>
             </CategoryProvider>
           </AuthProvider>
           <Analytics />

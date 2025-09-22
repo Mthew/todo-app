@@ -1,195 +1,112 @@
 "use client";
 
-import { useState } from "react";
-import type { Task, TaskFormData } from "@/lib/types";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, FolderPlus } from "lucide-react";
-import { TaskDialog, CategoryColumn } from "@/components/features/board";
 import {
   CategoryDialog,
   DeleteCategoryDialog,
   useCategory,
   Category,
+  CategoryColumn,
 } from "@/modules/category";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  TaskDialog,
+  useTask,
+  Task,
+  TaskFormData,
+  TaskFilter,
+} from "@/modules/task";
 
-// Mock tasks data - TODO: Replace with real API calls
-const mockTasks: Task[] = [
-  {
-    id: 1,
-    title: "Design new landing page",
-    description:
-      "Create a modern, responsive landing page for the new product launch",
-    priority: "alta",
-    dueDate: "2024-01-15T10:00:00Z",
-    completed: false,
-    category: { id: 1, name: "To Do" },
-    tags: [
-      { id: 1, name: "Design" },
-      { id: 2, name: "Frontend" },
-    ],
-  },
-  {
-    id: 2,
-    title: "Implement user authentication",
-    description: "Set up secure login and registration system",
-    priority: "alta",
-    dueDate: "2024-01-20T15:30:00Z",
-    completed: false,
-    category: { id: 2, name: "In Progress" },
-    tags: [
-      { id: 3, name: "Backend" },
-      { id: 4, name: "Security" },
-    ],
-  },
-];
+export default function BoardPage() {
+  const { state: categoryState, deleteCategory } = useCategory();
 
-export default function DashboardPage() {
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] =
-    useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const { state: taskState, createTask, updateTask, deleteTask } = useTask();
+
+  // Dialog states
+  const [isNewCategoryOpen, setIsNewCategoryOpen] = useState(false);
+  const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
     null
   );
 
-  // Use the category context
-  const {
-    state: categoryState,
-    fetchCategories,
-    deleteCategory,
-  } = useCategory();
-  const {
-    categories,
-    isLoading: categoriesLoading,
-    error: categoriesError,
-  } = categoryState;
-
-  const handleCreateTask = (data: TaskFormData) => {
-    const category = categories.find((c) => c.id === data.categoryId);
-    if (!category) return;
-
-    const newTask: Task = {
-      id: Math.max(...tasks.map((t) => t.id)) + 1,
-      title: data.title,
-      description: data.description,
-      priority: data.priority,
-      dueDate: data.dueDate,
-      completed: false,
-      category,
-      tags: [],
-    };
-
-    setTasks((prev) => [...prev, newTask]);
-  };
-
-  const handleEditTask = (data: TaskFormData) => {
-    if (!editingTask) return;
-
-    const category = categories.find((c) => c.id === data.categoryId);
-    if (!category) return;
-
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === editingTask.id
-          ? {
-              ...task,
-              title: data.title,
-              description: data.description,
-              priority: data.priority,
-              dueDate: data.dueDate,
-              category,
-            }
-          : task
-      )
-    );
-    setEditingTask(null);
-  };
-
-  const handleDeleteTask = (taskId: number) => {
-    setTasks((prev) => prev.filter((task) => task.id !== taskId));
-  };
-
-  const openEditDialog = (task: Task) => {
-    setEditingTask(task);
-    setDialogOpen(true);
-  };
-
-  const openCreateDialog = () => {
-    setEditingTask(null);
-    setDialogOpen(true);
-  };
-
-  const handleSubmit = (data: TaskFormData) => {
-    if (editingTask) {
-      handleEditTask(data);
-    } else {
-      handleCreateTask(data);
+  const handleDeleteCategory = async () => {
+    if (categoryToDelete) {
+      await deleteCategory(categoryToDelete.id);
+      setCategoryToDelete(null);
     }
+  };
+
+  // Task handlers
+  const handleCreateTask = async (data: TaskFormData) => {
+    await createTask(data);
+    setIsNewTaskOpen(false);
+  };
+
+  const handleUpdateTask = async (data: TaskFormData) => {
+    if (editingTask) {
+      await updateTask(editingTask.id, data);
+      setEditingTask(null);
+    }
+  };
+
+  // Helper functions
+  const openEditDialog = (task: any) => {
+    // Convert old task format to new task format for editing
+    const newTask = taskState.tasks.find((t) => t.id === task.id);
+    if (newTask) {
+      setEditingTask(newTask);
+    }
+  };
+
+  const convertTasksForDisplay = (tasks: Task[], categoryId: number) => {
+    const category = categoryState.categories.find((c) => c.id === categoryId);
+    if (!category) return [];
+
+    return tasks.map((task) => ({
+      ...task,
+      category: category,
+      userId: task.userId || 1, // Provide default userId for compatibility
+      tags: task.tags || [],
+    }));
   };
 
   const getTasksByCategory = (categoryId: number) => {
-    return tasks.filter((task) => task.category.id === categoryId);
+    const filteredTasks = taskState.tasks.filter(
+      (task: Task) => task.categoryId === categoryId
+    );
+    return convertTasksForDisplay(filteredTasks, categoryId);
   };
 
-  const handleCategorySuccess = () => {
-    fetchCategories();
+  const convertTaskForEdit = (task: Task | null) => {
+    if (!task) return null;
+    const category = categoryState.categories.find(
+      (c) => c.id === task.categoryId
+    );
+    if (!category) return null;
+
+    return {
+      ...task,
+      category: category,
+      tags: task.tags || [],
+    };
   };
 
-  // Category handlers
-  const handleEditCategory = (category: Category) => {
-    setEditingCategory(category);
-    setCategoryDialogOpen(true);
-  };
+  const isLoading = categoryState.isLoading || taskState.isLoading;
+  const error = categoryState.error || taskState.error;
 
-  const handleDeleteCategory = (categoryId: number) => {
-    const category = categories.find((c) => c.id === categoryId);
-    if (category) {
-      setCategoryToDelete(category);
-      setDeleteCategoryDialogOpen(true);
-    }
-  };
-
-  const confirmDeleteCategory = async () => {
-    if (!categoryToDelete) return;
-
-    try {
-      await deleteCategory(categoryToDelete.id);
-
-      // Remove tasks from the deleted category
-      setTasks((prev) =>
-        prev.filter((task) => task.category.id !== categoryToDelete.id)
-      );
-
-      // Close dialog and reset state
-      setDeleteCategoryDialogOpen(false);
-      setCategoryToDelete(null);
-    } catch (error) {
-      console.error("Failed to delete category:", error);
-      // Error handling is already done in the context
-    }
-  };
-
-  const handleCategoryDialogClose = (open: boolean) => {
-    setCategoryDialogOpen(open);
-    if (!open) {
-      setEditingCategory(null);
-    }
-  };
-
-  // Show loading state
-  if (categoriesLoading && categories.length === 0) {
+  if (isLoading && categoryState.categories.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="container mx-auto p-6">
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading categories...</p>
-            </div>
+      <div className="p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-gray-100 rounded-lg p-4 h-96"></div>
+            ))}
           </div>
         </div>
       </div>
@@ -197,99 +114,93 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">My Tasks</h1>
-            <p className="text-muted-foreground mt-1">
-              Organize and track your work efficiently
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setCategoryDialogOpen(true)}
-              variant="outline"
-              className="gap-2"
-            >
-              <FolderPlus className="h-4 w-4" />
-              <span className="hidden sm:inline">New Category</span>
-            </Button>
-            <Button onClick={openCreateDialog} className="gap-2">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">New Task</span>
-            </Button>
-          </div>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Task Board</h1>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsNewCategoryOpen(true)}
+            variant="outline"
+            size="sm"
+          >
+            <FolderPlus className="w-4 h-4 mr-2" />
+            New Category
+          </Button>
+          <Button onClick={() => setIsNewTaskOpen(true)} size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            New Task
+          </Button>
         </div>
-
-        {categoriesError && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertDescription>
-              Error loading categories: {categoriesError}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={fetchCategories}
-                className="ml-2"
-              >
-                Retry
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="flex overflow-x-auto pb-4 gap-6">
-          {categories.length === 0 ? (
-            <div className="w-full text-center py-20">
-              <p className="text-muted-foreground mb-4">
-                No categories found. Create your first category to get started!
-              </p>
-              <Button
-                onClick={() => setCategoryDialogOpen(true)}
-                className="gap-2"
-              >
-                <FolderPlus className="h-4 w-4" />
-                Create Category
-              </Button>
-            </div>
-          ) : (
-            categories.map((category) => (
-              <CategoryColumn
-                key={category.id}
-                category={category}
-                tasks={getTasksByCategory(category.id)}
-                onEditTask={openEditDialog}
-                onDeleteTask={handleDeleteTask}
-                onEditCategory={handleEditCategory}
-                onDeleteCategory={handleDeleteCategory}
-              />
-            ))
-          )}
-        </div>
-
-        <TaskDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          task={editingTask}
-          categories={categories}
-          onSubmit={handleSubmit}
-        />
-
-        <CategoryDialog
-          open={categoryDialogOpen}
-          onOpenChange={handleCategoryDialogClose}
-          onSuccess={handleCategorySuccess}
-          category={editingCategory}
-        />
-
-        <DeleteCategoryDialog
-          open={deleteCategoryDialogOpen}
-          onOpenChange={setDeleteCategoryDialogOpen}
-          category={categoryToDelete}
-          onConfirm={confirmDeleteCategory}
-          isLoading={categoryState.isLoading}
-        />
       </div>
+      <TaskFilter
+        filter={filter}
+        onFilterChange={setFilter}
+        categories={categories}
+      />
+      {error && (
+        <Alert className="mb-6" variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-x-40 ">
+        {categoryState.categories.map((category: Category) => (
+          <CategoryColumn
+            key={category.id}
+            category={category}
+            tasks={getTasksByCategory(category.id)}
+            onEditTask={openEditDialog}
+            onDeleteTask={deleteTask}
+            onEditCategory={setEditingCategory}
+            onDeleteCategory={(categoryId: number) => {
+              const categoryToDelete = categoryState.categories.find(
+                (c) => c.id === categoryId
+              );
+              if (categoryToDelete) setCategoryToDelete(categoryToDelete);
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Create Category Dialog */}
+      <CategoryDialog
+        open={isNewCategoryOpen}
+        onOpenChange={setIsNewCategoryOpen}
+        onSuccess={() => setIsNewCategoryOpen(false)}
+      />
+
+      {/* Edit Category Dialog */}
+      <CategoryDialog
+        open={!!editingCategory}
+        onOpenChange={(open) => !open && setEditingCategory(null)}
+        onSuccess={() => setEditingCategory(null)}
+        category={editingCategory}
+      />
+
+      {/* Delete Category Dialog */}
+      <DeleteCategoryDialog
+        open={!!categoryToDelete}
+        onOpenChange={(open) => !open && setCategoryToDelete(null)}
+        onConfirm={handleDeleteCategory}
+        category={categoryToDelete}
+      />
+
+      {/* Create Task Dialog */}
+      <TaskDialog
+        open={isNewTaskOpen}
+        onOpenChange={setIsNewTaskOpen}
+        onSubmit={handleCreateTask}
+        categories={categoryState.categories}
+      />
+
+      {/* Edit Task Dialog */}
+      <TaskDialog
+        open={!!editingTask}
+        onOpenChange={(open) => !open && setEditingTask(null)}
+        onSubmit={handleUpdateTask}
+        task={convertTaskForEdit(editingTask)}
+        categories={categoryState.categories}
+      />
     </div>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import type { Task } from "@/lib/types";
 import { Category } from "../types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, FilePen, Trash2 } from "lucide-react";
-import { TaskCard } from "../../../components/features/board/task-card";
+import { TaskCard, Task } from "@/modules/task";
 
 interface CategoryColumnProps {
   category: Category;
@@ -32,7 +31,7 @@ export function CategoryColumn({
   onDeleteCategory,
 }: CategoryColumnProps) {
   return (
-    <div className="flex-shrink-0 w-80">
+    <div className="flex-shrink-0 w-80 ">
       <Card className="bg-card h-full">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
