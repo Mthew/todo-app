@@ -15,9 +15,7 @@ export const authServices = {
     return httpManager.post<RegisterResponse>("/auth/register", data);
   },
 
-  profile: async (token: string) => {
-    return httpManager.get("/auth/profile", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  profile: async () => {
+    return httpManager.get("/auth/profile");
   },
 };

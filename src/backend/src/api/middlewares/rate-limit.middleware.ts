@@ -1,4 +1,7 @@
-import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
+import rateLimit, {
+  RateLimitRequestHandler,
+  rateLimit as rateLimitNamed,
+} from "express-rate-limit";
 import { Request, Response } from "express";
 import { TooManyRequestsError } from "../../utils/AppError";
 import {
@@ -54,7 +57,8 @@ const createRateLimitFromSettings = (
       if (req.user?.id) {
         return `user_${req.user.id}`;
       }
-      return req.ip || req.socket.remoteAddress || "unknown";
+      // Use req.ip which handles IPv6 properly
+      return req.ip || "unknown";
     },
   });
 };

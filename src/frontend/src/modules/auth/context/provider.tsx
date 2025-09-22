@@ -169,7 +169,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       httpManager.setAuthToken(storedToken);
 
       // Verify token with backend
-      const response = await authServices.profile(storedToken);
+      const response = await authServices.profile();
       const user = (response.data as any).user as User;
 
       dispatch({

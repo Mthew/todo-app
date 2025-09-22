@@ -1,6 +1,7 @@
 export interface Category {
   id: number;
   name: string;
+  userId?: number; // Optional for backward compatibility
 }
 
 export interface Task {

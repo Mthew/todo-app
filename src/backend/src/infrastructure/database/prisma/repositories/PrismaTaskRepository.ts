@@ -132,8 +132,7 @@ export class PrismaTaskRepository implements ITaskRepository {
     }
 
     // Calculate skip for pagination
-    const skip =
-      filters.page && filters.limit ? (filters.page - 1) * filters.limit : 0;
+    const skip = (filters.page - 1) * filters.limit;
 
     // Execute count and data queries
     const [total, tasks] = await Promise.all([

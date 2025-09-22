@@ -1,23 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import type { Task, Category, TaskFormData } from "@/lib/types";
+import type { Task, TaskFormData } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Plus, FolderPlus } from "lucide-react";
+import { TaskDialog, CategoryColumn } from "@/components/features/board";
 import {
   CategoryDialog,
-  TaskDialog,
-  CategoryColumn,
-} from "@/components/features/board";
+  DeleteCategoryDialog,
+  useCategory,
+  Category,
+} from "@/modules/category";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Mock data - in a real app, this would come from your database
-const mockCategories: Category[] = [
-  { id: 1, name: "To Do" },
-  { id: 2, name: "In Progress" },
-  { id: 3, name: "Review" },
-  { id: 4, name: "Done" },
-];
-
+// Mock tasks data - TODO: Replace with real API calls
 const mockTasks: Task[] = [
   {
     id: 1,
@@ -27,7 +23,7 @@ const mockTasks: Task[] = [
     priority: "alta",
     dueDate: "2024-01-15T10:00:00Z",
     completed: false,
-    category: mockCategories[0],
+    category: { id: 1, name: "To Do" },
     tags: [
       { id: 1, name: "Design" },
       { id: 2, name: "Frontend" },
@@ -40,59 +36,37 @@ const mockTasks: Task[] = [
     priority: "alta",
     dueDate: "2024-01-20T15:30:00Z",
     completed: false,
-    category: mockCategories[1],
+    category: { id: 2, name: "In Progress" },
     tags: [
       { id: 3, name: "Backend" },
       { id: 4, name: "Security" },
-    ],
-  },
-  {
-    id: 3,
-    title: "Write API documentation",
-    description: "Document all REST endpoints with examples",
-    priority: "media",
-    completed: false,
-    category: mockCategories[2],
-    tags: [{ id: 5, name: "Documentation" }],
-  },
-  {
-    id: 4,
-    title: "Set up CI/CD pipeline",
-    description: "Configure automated testing and deployment",
-    priority: "baja",
-    completed: true,
-    category: mockCategories[3],
-    tags: [{ id: 6, name: "DevOps" }],
-  },
-  {
-    id: 5,
-    title: "Optimize database queries",
-    description: "Improve performance of slow queries",
-    priority: "media",
-    dueDate: "2024-01-25T09:00:00Z",
-    completed: false,
-    category: mockCategories[0],
-    tags: [
-      { id: 7, name: "Database" },
-      { id: 8, name: "Performance" },
     ],
   },
 ];
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
-  const [categories, setCategories] = useState<Category[]>(mockCategories); // Made categories state mutable
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false); // Added category dialog state
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [deleteCategoryDialogOpen, setDeleteCategoryDialogOpen] =
+    useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
+    null
+  );
 
-  const handleCreateCategory = (name: string) => {
-    const newCategory: Category = {
-      id: Math.max(...categories.map((c) => c.id)) + 1,
-      name,
-    };
-    setCategories((prev) => [...prev, newCategory]);
-  };
+  // Use the category context
+  const {
+    state: categoryState,
+    fetchCategories,
+    deleteCategory,
+  } = useCategory();
+  const {
+    categories,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+  } = categoryState;
 
   const handleCreateTask = (data: TaskFormData) => {
     const category = categories.find((c) => c.id === data.categoryId);
@@ -161,15 +135,73 @@ export default function DashboardPage() {
     return tasks.filter((task) => task.category.id === categoryId);
   };
 
+  const handleCategorySuccess = () => {
+    fetchCategories();
+  };
+
+  // Category handlers
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setCategoryDialogOpen(true);
+  };
+
+  const handleDeleteCategory = (categoryId: number) => {
+    const category = categories.find((c) => c.id === categoryId);
+    if (category) {
+      setCategoryToDelete(category);
+      setDeleteCategoryDialogOpen(true);
+    }
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      await deleteCategory(categoryToDelete.id);
+
+      // Remove tasks from the deleted category
+      setTasks((prev) =>
+        prev.filter((task) => task.category.id !== categoryToDelete.id)
+      );
+
+      // Close dialog and reset state
+      setDeleteCategoryDialogOpen(false);
+      setCategoryToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete category:", error);
+      // Error handling is already done in the context
+    }
+  };
+
+  const handleCategoryDialogClose = (open: boolean) => {
+    setCategoryDialogOpen(open);
+    if (!open) {
+      setEditingCategory(null);
+    }
+  };
+
+  // Show loading state
+  if (categoriesLoading && categories.length === 0) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading categories...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground text-balance">
-              My Tasks
-            </h1>
+            <h1 className="text-3xl font-bold text-foreground">My Tasks</h1>
             <p className="text-muted-foreground mt-1">
               Organize and track your work efficiently
             </p>
@@ -190,20 +222,51 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Kanban Board */}
+        {categoriesError && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>
+              Error loading categories: {categoriesError}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchCategories}
+                className="ml-2"
+              >
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="flex overflow-x-auto pb-4 gap-6">
-          {categories.map((category) => (
-            <CategoryColumn
-              key={category.id}
-              category={category}
-              tasks={getTasksByCategory(category.id)}
-              onEditTask={openEditDialog}
-              onDeleteTask={handleDeleteTask}
-            />
-          ))}
+          {categories.length === 0 ? (
+            <div className="w-full text-center py-20">
+              <p className="text-muted-foreground mb-4">
+                No categories found. Create your first category to get started!
+              </p>
+              <Button
+                onClick={() => setCategoryDialogOpen(true)}
+                className="gap-2"
+              >
+                <FolderPlus className="h-4 w-4" />
+                Create Category
+              </Button>
+            </div>
+          ) : (
+            categories.map((category) => (
+              <CategoryColumn
+                key={category.id}
+                category={category}
+                tasks={getTasksByCategory(category.id)}
+                onEditTask={openEditDialog}
+                onDeleteTask={handleDeleteTask}
+                onEditCategory={handleEditCategory}
+                onDeleteCategory={handleDeleteCategory}
+              />
+            ))
+          )}
         </div>
 
-        {/* Task Dialog */}
         <TaskDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
@@ -214,8 +277,17 @@ export default function DashboardPage() {
 
         <CategoryDialog
           open={categoryDialogOpen}
-          onOpenChange={setCategoryDialogOpen}
-          onSubmit={handleCreateCategory}
+          onOpenChange={handleCategoryDialogClose}
+          onSuccess={handleCategorySuccess}
+          category={editingCategory}
+        />
+
+        <DeleteCategoryDialog
+          open={deleteCategoryDialogOpen}
+          onOpenChange={setDeleteCategoryDialogOpen}
+          category={categoryToDelete}
+          onConfirm={confirmDeleteCategory}
+          isLoading={categoryState.isLoading}
         />
       </div>
     </div>
